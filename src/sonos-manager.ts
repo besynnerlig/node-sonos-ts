@@ -14,7 +14,13 @@ export class SonosManager {
   private readonly events: EventEmitter;
   private devices: SonosDevice[] = [];
   private zoneService: ZoneGroupTopologyService | undefined
-  constructor() {
+  /**
+   *Creates an instance of SonosManager.
+   * @param {object} options Some extra options that you're able to set on the manager.
+   * @param {boolean} options.noListener When 'true' the SonosManager will not setup an event listener for group updates. Use if you don't want group updates.
+   * @memberof SonosManager
+   */
+  constructor(private options: { noListener?: boolean } = { }) {
     this.events = new EventEmitter();
   }
 
@@ -76,7 +82,7 @@ export class SonosManager {
   }
 
   private SubscribeForGroupEvents(success: boolean): boolean {
-    if(success && this.zoneService) {
+    if(this.options.noListener !== true && success && this.zoneService) {
       this.zoneService.Events.on(ServiceEvents.Data, this.zoneEventSubscription)
     }
     return success;
@@ -100,7 +106,7 @@ export class SonosManager {
    * @memberof SonosManager
    */
   public CancelSubscription(): void {
-    if(this.zoneService !== undefined)
+    if(this.options.noListener !== true && this.zoneService !== undefined)
       this.zoneService.Events.removeListener(ServiceEvents.Data, this.zoneEventSubscription);
   }
 
